@@ -8,7 +8,7 @@ from resources.db.switchDatabase import connect_to_database, is_token_valid
 from resources.db.procedure import call_stored_procedure, sproc_response, \
                                    error_response
 
-class LookupInvProduct(Resource):
+class LookupInvBrand(Resource):
     def get(self):
         try:
             data = request.get_json()
