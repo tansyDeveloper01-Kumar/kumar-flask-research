@@ -4,7 +4,7 @@ from flask import request
 from resources.db.switchDatabase import (get_client_details_from_master_db,
                                         connect_to_database, close_connection)
 
-from resources.db.procedure import call_stored_procedure, sproc_response                                      
+from resources.db.procedure import call_stored_procedure, sproc_response, error_response
 
 
 class AuthBackend(Resource):

@@ -1,14 +1,15 @@
 import mysql.connector
 from mysql.connector import Error
+import os
 
-from resources.db.procedure import call_stored_procedure, sproc_response 
+from resources.db.procedure import call_stored_procedure, sproc_response, error_response 
 
 
 def get_client_details_from_master_db(user_domain_name):
-    connection = connect_to_database(host="104.199.137.128", 
-                                    database="sama_master",
-                                    user="masterdbuser",
-                                    password="xx9mastermysql6xx")
+    connection = connect_to_database(host=os.getenv("MYSQL_HOST"), 
+                                     database=os.getenv("MASTER_DB_NAME"),
+                                     user=os.getenv("MASTER_DB_USER"),
+                                     password=os.getenv("MASTER_DB_PASSWORD"))
 
     result_args, cursor = call_stored_procedure(connection,'sproc_sama_get_client_db_connnection_info_v2', user_domain_name, 1, 1, 0, 0, 0)
     
