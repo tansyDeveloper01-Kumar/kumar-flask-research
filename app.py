@@ -5,17 +5,25 @@ from dotenv import load_dotenv
 
 from resources.Authenticate.Auth import AuthBackend
 from resources.lookups.inventory.brand import LookupInvBrand
+from resources.lookups.inventory.productType import LookupInvProductType
+from resources.lookups.inventory.manufacture import LookupInvManufacture
+from resources.lookups.inventory.unitOfMeasure import LookupInvUnitOfMeasure
+from resources.lookups.inventory.account import LookupInvAccount
 
 api_bp = Blueprint('api', __name__)
 api = Api(api_bp)
 
 app = Flask(__name__)
 
-app.register_blueprint(api_bp, url_prefix='/api/v1')
+app.register_blueprint(api_bp, url_prefix='/api')
 
 # Route
-api.add_resource(AuthBackend, '/login')
-api.add_resource(LookupInvBrand, '/brand-items')
+api.add_resource(AuthBackend, '/v1/login')
+api.add_resource(LookupInvBrand, '/v1/brand-items')
+api.add_resource(LookupInvProductType, '/v1/product-type')
+api.add_resource(LookupInvManufacture, '/v1/manufacture')
+api.add_resource(LookupInvUnitOfMeasure, '/v1/measure')
+api.add_resource(LookupInvAccount, '/v1/account')
 
 
 if __name__ == "__main__":
