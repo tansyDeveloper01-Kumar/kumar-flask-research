@@ -32,4 +32,15 @@ def close_connection(connection, cursor):
         connection.close()
         cursor.close()
 
-
+def is_token_valid(token):
+    connection = connect_to_database(host=os.getenv("MYSQL_HOST"), 
+                                     database=os.getenv("MASTER_DB_NAME"),
+                                     user=os.getenv("MASTER_DB_USER"),
+                                     password=os.getenv("MASTER_DB_PASSWORD"))
+    result_args, cursor = call_stored_procedure(connection, 
+                                                'sproc_sama_validate_token', 
+                                                token, 0, 0, 9)
+    
+    sproc_result = sproc_response(cursor)
+    close_connection(connection, cursor)
+    return sproc_result, result_args
