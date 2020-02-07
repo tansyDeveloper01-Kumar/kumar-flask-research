@@ -2,6 +2,9 @@ from flask_restful import Resource
 from flask import request
 from mysql.connector import Error
 
+import mysql.connector
+import os
+
 from resources.db.switchDatabase import connect_to_database, is_token_valid
 
 from resources.db.procedure import call_stored_procedure, sproc_response, \
@@ -121,4 +124,32 @@ class InvProduct(Resource):
             
         except Exception as e:
             return {'Error': str(e)}, 400
-             
+
+        
+    def delete(self):
+        try:
+            data = request.get_json()
+            token = request.headers.get('token')
+            
+            sproc_result_array, result_args = is_token_valid(token)
+            client_db_details = [sproc_result for sproc_result in sproc_result_array[0]]
+            
+            client_db_connection = connect_to_database(user=client_db_details[2], 
+                                                       password=client_db_details[3],
+                                                       database=client_db_details[1],
+                                                       host=client_db_details[4])
+
+            args = []
+            conn = client_db_connection.cursor()
+            conn.callproc('sproc_inv_product_dml_del_v1')
+            # res = conn.fetchall()
+            
+            
+            if result_args[-3: -2][0] is not None:
+                return error_response(code=400, type='Bad Request', 
+                                      message=result_args[-1:][0], 
+                                      fbtrace_id=None), 400
+
+            return {'message': 'Product deleted successfully'}, 201            
+        except Exception as e:
+            return {'Error': str(e)}, 400
