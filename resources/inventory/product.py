@@ -35,7 +35,8 @@ class InvProduct(Resource):
                                       message='product not found', 
                                       fbtrace_id=None), 404
 
-            dropdown_data = [{'brand_id': each_product[0], 'brand': each_product[1]} for each_product in sproc_result]
+            dropdown_data = [{'product': each_product[0], 'product_type': each_product[1], 'entity_id': each_product[4]}
+                                for each_product in sproc_result]
             
             return {'status': 'Success', 'brands': dropdown_data}, 200
             
