@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from dotenv import load_dotenv
 
-from resources.Authenticate.sys_auth_routes import sys_auth_initialize_routes
+from resources.authenticate.sys_auth_routes import sys_auth_initialize_routes
 from resources.inventory.inv_product_routes import inv_product_initialize_routes
 from resources.lookups.inventory.lkp_inv_routes import lkp_inv_initialize_routes
 
