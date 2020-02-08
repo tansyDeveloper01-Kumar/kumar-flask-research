@@ -1,9 +1,5 @@
 from flask_restful import Resource
 from flask import request
-from mysql.connector import Error
-
-import mysql.connector
-import os
 
 from resources.db.switchDatabase import connect_to_database, is_token_valid
 

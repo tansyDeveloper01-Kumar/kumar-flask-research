@@ -1,8 +1,6 @@
 from flask_restful import Resource
 from flask import request
 
-from mysql.connector import Error
-
 from resources.db.switchDatabase import connect_to_database, is_token_valid
 
 from resources.db.procedure import call_stored_procedure, sproc_response, \
