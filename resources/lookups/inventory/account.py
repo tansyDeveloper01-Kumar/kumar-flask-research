@@ -7,10 +7,12 @@ from resources.db.procedure import call_stored_procedure, sproc_response, \
                                    error_response
 
 from resources.utils.decorators.screenPermission import check_screen_permission
+from resources.utils.decorators.authVerification import check_auth_verification
 
 class LookupInvAccount(Resource):
 
     @check_screen_permission(screen_name = "products")
+    @check_auth_verification()
     def get(self):
         try:
             token = request.headers.get('token')
