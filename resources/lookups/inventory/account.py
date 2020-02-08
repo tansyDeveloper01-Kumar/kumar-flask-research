@@ -6,7 +6,11 @@ from resources.db.switchDatabase import connect_to_database, is_token_valid
 from resources.db.procedure import call_stored_procedure, sproc_response, \
                                    error_response
 
+from resources.utils.decorators.screenPermission import check_screen_permission
+
 class LookupInvAccount(Resource):
+
+    @check_screen_permission(screen_name = "products")
     def get(self):
         try:
             token = request.headers.get('token')
