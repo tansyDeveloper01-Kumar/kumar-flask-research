@@ -1,5 +1,6 @@
 import flask
 import functools
+import json
 
 from resources.db.switchDatabase import connect_to_database, is_token_valid
 
@@ -25,6 +26,11 @@ def check_auth_verification():
                 if result_args[0] != token:
                     return {'status': "Failure", "Message": "Entered wrong token"}
                 else:
+                    client_db_connection = connect_to_database(user=sproc_result_array[0][2],
+                                                               password=sproc_result_array[0][3],
+                                                               database=sproc_result_array[0][1],
+                                                               host=sproc_result_array[0][4])
+                    kwargs['client_db_connection'] = client_db_connection
                     return function(request, *args, **kwargs)
 
         return wrapper

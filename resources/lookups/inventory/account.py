@@ -13,18 +13,9 @@ class LookupInvAccount(Resource):
 
     @check_screen_permission(screen_name = "products")
     @check_auth_verification()
-    def get(self):
+    def get(self, *args, **kwargs):
         try:
-            token = request.headers.get('token')
-            sproc_result_array, result_args = is_token_valid(token)
-            client_db_details = [sproc_result for sproc_result in sproc_result_array[0]]
-            
-            client_db_connection = connect_to_database(user=client_db_details[2], 
-                                                       password=client_db_details[3],
-                                                       database=client_db_details[1],
-                                                       host=client_db_details[4])
-            
-            result_args, cursor = call_stored_procedure(client_db_connection, 
+            result_args, cursor = call_stored_procedure(kwargs['client_db_connection'],
                                                     'sproc_org_lkp_account',
                                                     request.headers.get('session_id'), 
                                                     request.headers.get('user_id'),
