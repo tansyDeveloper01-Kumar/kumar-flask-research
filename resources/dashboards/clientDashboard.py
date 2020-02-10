@@ -6,22 +6,16 @@ from resources.db.switchDatabase import connect_to_database, is_token_valid
 from resources.db.procedure import call_stored_procedure, sproc_response, \
                                    error_response
 
-
+from resources.utils.decorators.screenPermission import check_screen_permission
+from resources.utils.decorators.authVerification import check_auth_verification
 
 class OrgClientDashboard(Resource):
-    def get(self, *args):
+
+    @check_screen_permission(screen_name = "products")
+    @check_auth_verification()
+    def get(self, *args, **kwargs):
         try:
-            data = request.get_json()
-            token = data.get('token')
-            sproc_result_array, result_args = is_token_valid(token)
-            client_db_details = [sproc_result for sproc_result in sproc_result_array[0]]
-            
-            client_db_connection = connect_to_database(user=client_db_details[2], 
-                                                       password=client_db_details[3],
-                                                       database=client_db_details[1],
-                                                       host=client_db_details[4])
-            
-            result_args, cursor = call_stored_procedure(client_db_connection, 
+            result_args, cursor = call_stored_procedure(kwargs['client_db_connection'], 
                                                     'sproc_org_rpt_dashboard_client',
                                                     '2019-12-10','2019-12-10',84,
                                                     request.headers.get('session_id'), 
@@ -31,7 +25,7 @@ class OrgClientDashboard(Resource):
             sproc_result = []
             for result in cursor.stored_results():
                 sproc_result.append(result.fetchall())
-                          
+
             return {'status': 'Success', 'brands': sproc_result}, 200
             
         except Exception as e:
