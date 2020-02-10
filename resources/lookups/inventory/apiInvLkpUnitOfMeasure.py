@@ -9,14 +9,15 @@ from resources.db.procedure import call_stored_procedure, sproc_response, \
 from resources.utils.decorators.screenPermission import check_screen_permission
 from resources.utils.decorators.authVerification import check_auth_verification
 
-class LookupInvAccount(Resource):
+
+class clsInvLkpUnitOfMeasure(Resource):
 
     @check_screen_permission(screen_name = "products")
     @check_auth_verification()
     def get(self, *args, **kwargs):
         try:
-            result_args, cursor = call_stored_procedure(kwargs['client_db_connection'],
-                                                    'sproc_org_lkp_account',
+            result_args, cursor = call_stored_procedure(kwargs['client_db_connection'], 
+                                                    'sproc_inv_lkp_unit_of_measure',
                                                     request.headers.get('session_id'), 
                                                     request.headers.get('user_id'),
                                                     110001, 1, 1, 0, 0, 0)
