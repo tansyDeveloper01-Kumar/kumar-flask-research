@@ -40,7 +40,6 @@ class AuthBackend(Resource):
                                                             "desktop", 
                                                             token, *output_params)
                 
-                required_output_params = result_args[4:8]                
                 result_sets = sproc_response(cursor)
                                 
                 if result_args[10] == "Success":                
@@ -50,15 +49,16 @@ class AuthBackend(Resource):
 
                     result_json = {
                         'token': token,
-                        'audit_screen_visit': required_output_params[0],
-                        'debug_sproc': required_output_params[1],
-                        'session_id': required_output_params[2],
-                        'user_id': required_output_params[3],
+                        'audit_screen_visit': result_args[5],
+                        'debug_sproc': result_args[6],
+                        'session_id': result_args[7],
+                        'user_id': result_args[8],
+                        'login_success': result_args[9],
                         'module_names': result_sets_array
                     }
-                    return { 'Status': 'Success', 'Message': result_json}, 200
+                    return { 'Status': result_args[10], 'Message': result_json}, 200
                 else:
-                    return { 'Status': 'Failure', 'Message': result_args[10]}, 400
+                    return { 'Status': result_args[10], 'Message': result_args[10]}, 400
         except Exception as error:
             return {"error_response": error}, 400
         
