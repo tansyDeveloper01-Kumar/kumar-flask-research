@@ -6,12 +6,11 @@ from resources.db.switchDatabase import connect_to_database, is_token_valid
 from resources.db.procedure import call_stored_procedure, sproc_response, \
                                    error_response
 
-from resources.utils.decorators.screenPermission import check_screen_permission
-from resources.utils.decorators.authVerification import check_auth_verification
+from resources.utils.decorators.check_client_db_connection import check_client_db_connection
 
 class clsLkpOrgAccount(Resource):
 
-    @check_auth_verification()
+    @check_client_db_connection()
     def get(self, *args, **kwargs):
         try:
             screen_id = request.headers.get('screen_id')

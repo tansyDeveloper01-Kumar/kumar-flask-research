@@ -6,10 +6,10 @@ from resources.db.procedure import call_stored_procedure, sproc_response, error_
 
 
 def get_client_details_from_master_db(user_domain_name):
-    connection = connect_to_database(host=os.getenv("MYSQL_HOST"), 
-                                     database=os.getenv("MASTER_DB_NAME"),
-                                     user=os.getenv("MASTER_DB_USER"),
-                                     password=os.getenv("MASTER_DB_PASSWORD"))
+    connection = connect_to_database(host=os.getenv("MH"), 
+                                     database=os.getenv("MDN"),
+                                     user=os.getenv("MDU"),
+                                     password=os.getenv("MDP"))
 
     result_args, cursor = call_stored_procedure(connection,'sproc_sama_get_client_db_connnection_info_v2', user_domain_name, 1, 1, 0, 0, 0)
     
