@@ -1,7 +1,8 @@
 import mysql.connector
 from mysql.connector import Error
 
-def call_stored_procedure(connection, sproc_name, *args):
+# execute stored procedure
+def fn_call_stored_procedure(connection, sproc_name, *args):
     try:
         cursor = connection.cursor()
         result_args = cursor.callproc(sproc_name, args)
@@ -9,17 +10,8 @@ def call_stored_procedure(connection, sproc_name, *args):
     except Error as error:
         print('Failed to execute stored procedure: {0}'.format(error))
 
-
-def sproc_response(cursor):
+# capture result sets from the stored procedure execution
+def fn_sproc_response(cursor):
     for result in cursor.stored_results():
         return result.fetchall()
 
-def error_response(**kwargs):
-    return {
-        'error': {
-            'message': kwargs['message'],
-            'type': kwargs['type'],
-            'code': kwargs['code'],
-            'fbtrace_id': kwargs['fbtrace_id']
-        }
-    }        

@@ -1,9 +1,9 @@
 from flask_restful import Resource
 from flask import request
 
-from resources.db.switchDatabase import connect_to_database, is_token_valid
+from resources.db.dbConnect import connect_to_database, is_token_valid
 
-from resources.db.procedure import call_stored_procedure, sproc_response, \
+from resources.db.executeSProc import call_stored_procedure, sproc_response, \
                                    error_response
 
 from resources.utils.decorators.screenPermission import check_screen_permission

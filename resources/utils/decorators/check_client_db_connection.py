@@ -4,7 +4,7 @@ import json
 import os
 from cryptography.fernet import Fernet
 
-from resources.db.switchDatabase import connect_to_database, is_token_valid
+from resources.db.dbConnect import connect_to_database, is_token_valid
 
 def check_client_db_connection():
     """

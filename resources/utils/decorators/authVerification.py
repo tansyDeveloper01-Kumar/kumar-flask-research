@@ -2,7 +2,7 @@ import flask
 import functools
 import json
 
-from resources.db.switchDatabase import connect_to_database, is_token_valid
+from resources.db.dbConnect import connect_to_database, is_token_valid
 
 def check_auth_verification():
     """
