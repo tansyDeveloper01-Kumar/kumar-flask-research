@@ -8,7 +8,7 @@ from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_respons
 from resources.utils.crypto.crypto import fn_decrypt
 
 
-class AuthBackend(Resource):
+class clsLogin(Resource):
     
     def get(self):
         try:
@@ -17,17 +17,17 @@ class AuthBackend(Resource):
             password = data.get('password')
             login_id, domain_name = user_id.split('@', 1)
 
-            client_db_details, result_args = fn_get_client_DB_details(user_domain_name=domain_name)
+            result_sets, result_args = fn_get_client_DB_details(user_domain_name=domain_name)
 
-            if result_args[5] != None:
-                return {'status': 'Failure', 'message': result_args[5] }, 400
+            if result_args[3] == 1:
+                return {'status': 'Failure', 'data': result_args[5] }, 400
             else:
-                client_db_details = client_db_details[0]
+                client_db_details = result_sets[0]
 
                 if client_db_details[0] is None:
-                    return {'status': 'Failure', 'message': 'Invalid login' }, 400
+                    return {'status': 'Failure', 'data': 'Invalid login' }, 400
                 if not client_db_details:
-                    return {'status': 'Failure', 'message': 'Client database not found'}, 400
+                    return {'status': 'Failure', 'data': 'Client database not found'}, 400
 
                 token = client_db_details[0]
 
@@ -70,9 +70,9 @@ class AuthBackend(Resource):
                         'database': client_db_details[1],
                         'host': client_db_details[4]
                     }
-                    return { 'Status': result_args[10], 'Message': result_json}, 200
+                    return { 'Status': result_args[10], 'data': result_json}, 200
                 else:
-                    return { 'Status': result_args[10], 'Message': result_args[10]}, 400
+                    return { 'Status': 'Failure', 'data': result_args[10]}, 400
         except Exception as error:
             return {"error_response": error}, 400
         

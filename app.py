@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 # Crypto
 # from resources.utils.crypto.sys_crypto_routes import sys_crypto_routes
 
-from resources.authenticate.sys_auth_routes import sys_auth_initialize_routes
+from resources.authenticate.sys_auth_routes import fn_sys_auth_initialize_routes
 # from resources.inventory.inv_product_routes import inv_product_initialize_routes
 # from resources.dashboards.dashboard_routes import org_client_dashboard_initialize_routes
 
@@ -18,7 +18,7 @@ api = Api(app)
 
 # Route
 # sys_crypto_routes(api)
-sys_auth_initialize_routes(api)
+fn_sys_auth_initialize_routes(api)
 # inv_product_initialize_routes(api)
 # org_client_dashboard_initialize_routes(api)
 
