@@ -3,5 +3,5 @@
 from .apiLkpOrgAccount import clsLkpOrgAccount
 
 
-def lkp_org_initialize_routes(api):
+def fn_lkp_org_initialize_routes(api):
     api.add_resource(clsLkpOrgAccount, '/api/lkp/v1/account')

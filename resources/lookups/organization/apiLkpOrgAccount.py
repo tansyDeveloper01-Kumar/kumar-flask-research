@@ -1,45 +1,55 @@
 from flask_restful import Resource
 from flask import request
 
-from resources.db.dbConnect import connect_to_database, is_token_valid
-
-from resources.db.executeSProc import call_stored_procedure, sproc_response, \
-                                   error_response
-
-from resources.utils.decorators.check_client_db_connection import check_client_db_connection
+from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response
+from resources.utils.decorators.check_client_db_connection import make_client_db_connection
 
 class clsLkpOrgAccount(Resource):
 
-    @check_client_db_connection()
+    @make_client_db_connection()
     def get(self, *args, **kwargs):
         try:
             screen_id = request.headers.get('screen_id')
             user_id = request.headers.get('user_id')
             session_id = request.headers.get('session_id')
+            debug_sproc = request.headers.get('debug_sproc')
+            audit_screen_visit = request.headers.get('audit_screen_visit')
             student_entity_id = request.headers.get('student_entity_id')
             token = request.headers.get('token')
 
-            result_arg, cursor1 = call_stored_procedure(kwargs['client_db_connection'],
+            check_permission_output_params = [1, 1, 0, 0, 0]
+            screen_permission_result_sets, screen_permission_cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
                                                     'sproc_sec_check_screen_permission_v2',
                                                     screen_id, 
                                                     user_id,
                                                     session_id,
                                                     student_entity_id,
-                                                    token, 1, 1, 0, 0, 0)
+                                                    token,
+                                                    *check_permission_output_params)
 
-            if (result_arg[5] == 0 and result_arg[7] == 1):
-                return { 'Status': 'Failure', 'Message': result_arg[9]}, 400
+            # screen_permission_result_sets[5] == valid access & screen_permission_result_sets[7] == error flag
+            if (screen_permission_result_sets[5] == 0 and screen_permission_result_sets[7] == 1):
+                return { 'Status': 'Failure', 'Message': screen_permission_result_sets[9]}, 400
             else:
-                result_args, cursor = call_stored_procedure(kwargs['client_db_connection'],
-                                                        'sproc_org_lkp_account',
-                                                        request.headers.get('session_id'), 
-                                                        request.headers.get('user_id'),
-                                                        110001, 1, 1, 0, 0, 0)
-                sproc_result = sproc_response(cursor)
+                account_lkp_output_params = [0, 0, 0]
+                account_lkp_result_args, account_lkp_cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                               'sproc_org_lkp_account',
+                                                               session_id,
+                                                               user_id,
+                                                               screen_id,
+                                                               debug_sproc,
+                                                               audit_screen_visit,
+                                                               *account_lkp_output_params)
                 
-                dropdown_data = [{'brand_id': each_product[0], 'brand': each_product[1]} for each_product in sproc_result]
+                sproc_result = fn_sproc_response(account_lkp_cursor)
+
+                account_data = [{
+                                 'entity_id': each_account[0],
+                                 'entity_name': each_account[1]
+                                } for each_account in sproc_result
+                               ]
                 
-                return {'status': 'Success', 'measure': dropdown_data}, 200
+                return {'status': 'Success', 'measure': account_data}, 200
             
         except Exception as e:
             return {'Error': str(e)}, 400
