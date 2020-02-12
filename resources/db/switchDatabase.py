@@ -33,10 +33,10 @@ def close_connection(connection, cursor):
         cursor.close()
 
 def is_token_valid(token):
-    connection = connect_to_database(host=os.getenv("MYSQL_HOST"), 
-                                     database=os.getenv("MASTER_DB_NAME"),
-                                     user=os.getenv("MASTER_DB_USER"),
-                                     password=os.getenv("MASTER_DB_PASSWORD"))
+    connection = connect_to_database(host=os.getenv("MH"), 
+                                     database=os.getenv("MDN"),
+                                     user=os.getenv("MDU"),
+                                     password=os.getenv("MDP"))
     result_args, cursor = call_stored_procedure(connection, 
                                                 'sproc_sama_validate_token', 
                                                 token, 0, 0, 9)
