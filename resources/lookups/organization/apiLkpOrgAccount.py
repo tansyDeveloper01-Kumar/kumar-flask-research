@@ -2,11 +2,11 @@ from flask_restful import Resource
 from flask import request
 
 from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response
-from resources.utils.decorators.clientDBConnection import make_client_db_connection
+from resources.utils.decorators.clientDBConnection import fn_make_client_db_connection
 
 class clsLkpOrgAccount(Resource):
 
-    @make_client_db_connection()
+    @fn_make_client_db_connection()
     def get(self, *args, **kwargs):
         try:
             screen_id = request.headers.get('screen_id')

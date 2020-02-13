@@ -6,7 +6,7 @@ from cryptography.fernet import Fernet
 from resources.db.dbConnect import fn_connect_client_db
 from resources.utils.crypto.crypto import fn_decrypt
 
-def make_client_db_connection():
+def fn_make_client_db_connection():
     """
     check user permission for screen
     will also add current screen id to request object
