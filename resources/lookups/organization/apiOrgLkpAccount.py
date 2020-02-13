@@ -26,12 +26,16 @@ class clsLkpOrgAccount(Resource):
                 audit_screen_visit,
                 *account_lkp_output_params)
 
-            sproc_result_sets = fn_sproc_response(cursor)
-            account_lkp_data = [{ 'entity_id': each_account[0], 'entity_name': each_account[1] }
-                                for each_account in sproc_result_sets
-                           ]
+            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
+            if sproc_result_args[5] == 1:
+                return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
+            else:
+                sproc_result_sets = fn_sproc_response(cursor)
 
-            return {'status': 'Success', 'data': account_lkp_data}, 200
+                account_lkp_data = [{ 'entity_id': each_account[0], 'entity_name': each_account[1] }
+                                    for each_account in sproc_result_sets]
+
+                return {'status': 'Success', 'data': account_lkp_data}, 200
 
         except Exception as e:
             return {'Error': str(e)}, 400
