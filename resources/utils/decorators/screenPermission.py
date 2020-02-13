@@ -20,19 +20,17 @@ def fn_check_screen_permission():
             token = flask.request.headers.get('token')
 
             check_permission_output_params = [1, 1, 0, 0, 0]
-            screen_permission_result_sets, screen_permission_cursor = fn_call_stored_procedure(
-                                                                            kwargs['client_db_connection'],
-                                                                            'sproc_sec_check_screen_permission_v2',
-                                                                            screen_id,
-                                                                            user_id,
-                                                                            session_id,
-                                                                            student_entity_id,
-                                                                            token,
-                                                                            *check_permission_output_params)
-            
+            sproc_result_sets, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                                 'sproc_sec_check_screen_permission_v2',
+                                                                 screen_id,
+                                                                 user_id,
+                                                                 session_id,
+                                                                 student_entity_id,
+                                                                 token,
+                                                                 *check_permission_output_params)
             # screen_permission_result_sets[5] == valid access & screen_permission_result_sets[7] == err_flag
-            if (screen_permission_result_sets[5] == 0 and screen_permission_result_sets[7] == 1):
-                return { 'Status': 'Failure', 'Message': screen_permission_result_sets[9]}, 400
+            if (sproc_result_sets[5] == 0):
+                return { 'Status': 'Failure', 'Message': sproc_result_sets[9]}, 400
             else:
                 kwargs['screen_id'] = screen_id
                 kwargs['user_id'] = user_id
