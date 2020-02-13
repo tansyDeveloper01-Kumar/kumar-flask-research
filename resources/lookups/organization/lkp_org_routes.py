@@ -1,6 +1,6 @@
 # ~/mysql-flask-connector/resources/lookups/inventory/lkp_inv_routes.py
 
-from .apiLkpOrgAccount import clsLkpOrgAccount
+from .apiOrgLkpAccount import clsLkpOrgAccount
 
 
 def fn_lkp_org_initialize_routes(api):
