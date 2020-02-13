@@ -29,6 +29,7 @@ def fn_check_screen_permission():
                                                                             student_entity_id,
                                                                             token,
                                                                             *check_permission_output_params)
+            
             # screen_permission_result_sets[5] == valid access
             if (screen_permission_result_sets[5] == 0):
                 return { 'Status': 'Failure', 'Message': screen_permission_result_sets[9]}, 400

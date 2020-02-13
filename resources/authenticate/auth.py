@@ -1,8 +1,8 @@
 from flask_restful import Resource
 from flask import request
 
-from resources.db.dbConnect import (fn_get_client_DB_details,
-                                    fn_connect_client_db, close_db_connection)
+from resources.db.dbConnect import (fn_sama_get_client_DB_details,
+                                    fn_connect_client_db, fn_close_db_connection)
 
 from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response
 from resources.utils.crypto.crypto import fn_decrypt
@@ -17,12 +17,12 @@ class clsLogin(Resource):
             password = data.get('password')
             login_id, domain_name = user_id.split('@', 1)
 
-            result_sets, result_args = fn_get_client_DB_details(user_domain_name=domain_name)
+            sproc_sama_result_sets, sproc_sama_result_args = fn_sama_get_client_DB_details(user_domain_name=domain_name)
 
-            if result_args[3] == 1:
-                return {'status': 'Failure', 'data': result_args[5] }, 400
+            if sproc_sama_result_args[3] == 1:
+                return {'status': 'Failure', 'data': sproc_sama_result_args[5] }, 400
             else:
-                client_db_details = result_sets[0]
+                client_db_details = sproc_sama_result_sets[0]
 
                 if client_db_details[0] is None:
                     return {'status': 'Failure', 'data': 'Invalid login' }, 400
@@ -42,7 +42,7 @@ class clsLogin(Resource):
                                                             host=db_host)
                 output_params = [0, 0, 0, 0, 0, 0, 0, 0, 0]
                 
-                result_args, cursor = fn_call_stored_procedure(client_db_connection,
+                sproc_result_args, cursor = fn_call_stored_procedure(client_db_connection,
                                                             'sproc_sec_login_v2', 
                                                             login_id, 
                                                             password,
@@ -50,29 +50,29 @@ class clsLogin(Resource):
                                                             "desktop", 
                                                             token, *output_params)
                 
-                result_sets = fn_sproc_response(cursor)
+                sproc_result_sets = fn_sproc_response(cursor)
                                 
-                if result_args[10] == "Success":                
-                    result_sets_array = [result_set[0] for result_set in result_sets]
+                if sproc_result_args[10] == "Success":
+                    get_module_names = [result_set[0] for result_set in sproc_result_sets]
 
-                    close_db_connection(client_db_connection, cursor)
+                    fn_close_db_connection(client_db_connection, cursor)
 
                     result_json = {
                         'token': token,
-                        'audit_screen_visit': result_args[5],
-                        'debug_sproc': result_args[6],
-                        'session_id': result_args[7],
-                        'user_id': result_args[8],
-                        'login_success': result_args[9],
-                        'module_names': result_sets_array,
+                        'audit_screen_visit': sproc_result_args[5],
+                        'debug_sproc': sproc_result_args[6],
+                        'session_id': sproc_result_args[7],
+                        'user_id': sproc_result_args[8],
+                        'login_success': sproc_result_args[9],
+                        'module_names': get_module_names,
                         'user': client_db_details[2],
                         'password': client_db_details[3],
                         'database': client_db_details[1],
                         'host': client_db_details[4]
                     }
-                    return { 'Status': result_args[10], 'data': result_json}, 200
+                    return { 'Status': sproc_result_args[10], 'data': result_json}, 200
                 else:
-                    return { 'Status': 'Failure', 'data': result_args[10]}, 400
+                    return { 'Status': 'Failure', 'data': sproc_result_args[10]}, 400
         except Exception as error:
             return {"error_response": error}, 400
         
