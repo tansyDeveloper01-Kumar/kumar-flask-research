@@ -30,8 +30,8 @@ def fn_check_screen_permission():
                                                                             token,
                                                                             *check_permission_output_params)
             
-            # screen_permission_result_sets[5] == valid access
-            if (screen_permission_result_sets[5] == 0):
+            # screen_permission_result_sets[5] == valid access & screen_permission_result_sets[7] == err_flag
+            if (screen_permission_result_sets[5] == 0 and screen_permission_result_sets[7] == 1):
                 return { 'Status': 'Failure', 'Message': screen_permission_result_sets[9]}, 400
             else:
                 kwargs['screen_id'] = screen_id
