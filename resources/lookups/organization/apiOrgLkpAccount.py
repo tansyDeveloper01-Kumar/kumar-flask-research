@@ -32,10 +32,7 @@ class clsLkpOrgAccount(Resource):
             else:
                 sproc_result_sets = fn_sproc_response(cursor)
 
-                account_lkp_data = [{ 'entity_id': each_account[0], 'entity_name': each_account[1] }
-                                    for each_account in sproc_result_sets]
-
-                return {'status': 'Success', 'data': account_lkp_data}, 200
+                return {'status': 'Success', 'data': sproc_result_sets}, 200
 
         except Exception as e:
             return {'Error': str(e)}, 400
