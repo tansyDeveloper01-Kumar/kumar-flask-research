@@ -1,5 +1,6 @@
-from cryptography.fernet import Fernet
 import os
+import hashlib
+from cryptography.fernet import Fernet
 
 def fn_encrypt(secret):
   x = os.getenv("MX")
@@ -22,4 +23,11 @@ def fn_decrypt(cipher):
     return key
 
 def fn_hash(key):
-    return hash(key)
+    try:
+        m = hashlib.sha256()
+        key_byte = key.encode('utf-8')
+        m.update(key_byte)
+        hash_sha256_key = m.hexdigest()
+        return str(hash_sha256_key)
+    except Exception as e:
+        return str(e)

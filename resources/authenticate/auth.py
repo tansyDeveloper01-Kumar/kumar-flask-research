@@ -15,7 +15,7 @@ class clsLogin(Resource):
             data = request.get_json()
             user_id = data.get('domain_name')
             password = data.get('password')
-            hash_password = fn_hash(password)
+            hash_password = fn_hash(data.get('password'))
 
             login_id, domain_name = user_id.split('@', 1)
 
@@ -43,7 +43,6 @@ class clsLogin(Resource):
                                                             database=db_name,
                                                             host=db_host)
                 output_params = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                
                 sproc_result_args, cursor = fn_call_stored_procedure(client_db_connection,
                                                             'sproc_sec_login_v2', 
                                                             login_id, 

@@ -8,18 +8,21 @@ from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_respons
 # connect to master db and get client db connection details
 # static connection
 def fn_sama_get_client_DB_details(user_domain_name):
-    connection = fn_connect_client_db(host=os.getenv("MH"),
-                                     database=os.getenv("MDN"),
-                                     user=os.getenv("MDU"),
-                                     password=os.getenv("MDP"))
+    try:
+        connection = fn_connect_client_db(host=os.getenv("MH"),
+                                         database=os.getenv("MDN"),
+                                         user=os.getenv("MDU"),
+                                         password=os.getenv("MDP"))
 
-    sproc_result_args, cursor = fn_call_stored_procedure(connection,
-                                                   'sproc_sama_get_client_db_connnection_info_v2',
-                                                   user_domain_name, 1, 1, 0, 0, 0)
+        sproc_result_args, cursor = fn_call_stored_procedure(connection,
+                                                             'sproc_sama_get_client_db_connnection_info_v2',
+                                                             user_domain_name, 1, 1, 0, 0, 0)
 
-    sproc_result_sets = fn_sproc_response(cursor)
-    fn_close_db_connection(connection, cursor)
-    return sproc_result_sets, sproc_result_args
+        sproc_result_sets = fn_sproc_response(cursor)
+        fn_close_db_connection(connection, cursor)
+        return sproc_result_sets, sproc_result_args
+    except Error as e:
+        return str(e)
 
 
 # connect to client db
