@@ -24,7 +24,7 @@ def fn_sama_get_client_DB_details(user_domain_name):
             fn_close_db_connection(connection, cursor)
             return sproc_result_sets, sproc_result_args
     except mysql.connector.Error as e:
-        return str(e)
+        return str(e), 400
 
 
 # connect to client db

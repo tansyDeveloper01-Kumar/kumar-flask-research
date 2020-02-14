@@ -3,7 +3,7 @@ from flask_restful import Api
 from dotenv import load_dotenv
 
 from resources.authenticate.sys_auth_routes import fn_sys_auth_initialize_routes
-# from resources.inventory.inv_product_routes import inv_product_initialize_routes
+from resources.inventory.inv_product_routes import fn_inv_product_initialize_routes
 # from resources.dashboards.dashboard_routes import org_client_dashboard_initialize_routes
 
 # Lookups paths
@@ -14,9 +14,8 @@ app = Flask(__name__)
 api = Api(app)
 
 # Route
-# sys_crypto_routes(api)
 fn_sys_auth_initialize_routes(api)
-# inv_product_initialize_routes(api)
+fn_inv_product_initialize_routes(api)
 # org_client_dashboard_initialize_routes(api)
 
 fn_lkp_inv_initialize_routes(api)

@@ -1,179 +1,152 @@
 from flask_restful import Resource
 from flask import request
 
-from resources.db.dbConnect import connect_to_database, is_token_valid
-
-from resources.db.executeSProc import call_stored_procedure, sproc_response, \
-                                   error_response
+from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response
+from resources.utils.decorators.clientDBConnection import fn_make_client_db_connection
+from resources.utils.decorators.screenPermission import fn_check_screen_permission
 
 
 class InvProductDetails(Resource):
-    def get(self):
+
+    @fn_make_client_db_connection()
+    @fn_check_screen_permission()
+    def get(self, *args, **kwargs):
         try:
-            token = request.headers.get('token')
-            entity_id = int(request.headers.get('entity_id'))
-            sproc_result_array, result_args = is_token_valid(token)
-            client_db_details = [sproc_result for sproc_result in sproc_result_array[0]]
+            entity_id = request.headers.get('entity_id')
+            debug_sproc = request.headers.get('debug_sproc')
+            audit_screen_visit = request.headers.get('audit_screen_visit')
 
-            client_db_connection = connect_to_database(user=client_db_details[2],
-                                                       password=client_db_details[3],
-                                                       database=client_db_details[1],
-                                                       host=client_db_details[4])
+            output_params = [0, 0, 0]
+            sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                                 'sproc_inv_product_detail',
+                                                                 int(entity_id),
+                                                                 kwargs['session_id'],
+                                                                 kwargs['user_id'],
+                                                                 kwargs['screen_id'],
+                                                                 debug_sproc,
+                                                                 audit_screen_visit,
+                                                                 *output_params)
 
-            result_args, cursor = call_stored_procedure(client_db_connection,
-                                                        'sproc_inv_product_detail',
-                                                        entity_id,
-                                                        request.headers.get('session_id'),
-                                                        request.headers.get('user_id'),
-                                                        110001, 1, 1, None, None, None)
+            sproc_result_args_type = isinstance(sproc_result_args, str)
+            if sproc_result_args_type == True and cursor == 400:
+                return {'status': 'Failure', 'data': sproc_result_args}, 400
+            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
+            elif sproc_result_args[5] == 1:
+                return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
+            else:
+                sproc_result_sets = fn_sproc_response(cursor)
 
-            sproc_result = sproc_response(cursor)
+                product_details = [{'product': each_product[0],
+                                    'product_type_entity_id': each_product[1],
+                                    'unit_rate': str(each_product[2]),
+                                    'start_reminder_months': each_product[3],
+                                    'stop_reminder_months': each_product[4],
+                                    'max_reminder_count': each_product[5],
+                                    'product_type_entity_id': each_product[6],
+                                    'product_entity_id': each_product[7],
+                                    'active': each_product[8],
+                                    'reminder_sms_text': each_product[9],
+                                    'reminder_email_text': each_product[10],
+                                    'uom_type_id': str(each_product[11]),
+                                    'unit_content': str(each_product[12]),
+                                    're_order_level': each_product[13],
+                                    'maintain_inventory_flag': each_product[14],
+                                    'brand_id': each_product[15]}
+                                    for each_product in sproc_result_sets]
 
-            if not sproc_result:
-                return error_response(code=404, type='Not Found',
-                                      message='product not found',
-                                      fbtrace_id=None), 404
-
-            product_details = [{'product': each_product[0],
-                                'product_type': each_product[1],
-                                'unit_rate': str(each_product[2]),
-                                'start_reminder_months': each_product[3],
-                                'stop_reminder_months': each_product[4],
-                                'max_reminder_count': each_product[5],
-                                'product_type_entity_id': each_product[6],
-                                'product_entity_id': each_product[7],
-                                'max_reminder_count': each_product[8],
-                                'active': each_product[9],
-                                'reminder_sms_text': each_product[10],
-                                'reminder_email_text': each_product[11],
-                                'uom_type_id': str(each_product[12]),
-                                'unit_content': str(each_product[13]),
-                                're_order_level': each_product[14],
-                                'maintain_inventory_flag': each_product[15]}
-                                for each_product in sproc_result]
-
-            return {'status': 'Success', 'product_details': product_details}, 200
+                return {'status': 'Success', 'product_details': product_details}, 200
 
         except Exception as e:
             return {'Error': str(e)}, 400
 
-
-    def put(self):
-        try:
-            token = request.headers.get('token')
-            entity_id = int(request.headers.get('entity_id'))
-
-            sproc_result_array, result_args = is_token_valid(token)
-            client_db_details = [sproc_result for sproc_result in sproc_result_array[0]]
-
-            client_db_connection = connect_to_database(user=client_db_details[2],
-                                                       password=client_db_details[3],
-                                                       database=client_db_details[1],
-                                                       host=client_db_details[4])
-
-            try:
-                conn = client_db_connection.cursor()
-                conn.callproc('sproc_inv_product_dml_del', (entity_id,
-                                                            request.headers.get('session_id'),
-                                                            request.headers.get('user_id'),
-                                                            110001, 1, 1, None, None, None))
-
-                return {'status': 'Success', 'result': "Product deleted successfully"}, 200
-            except Exception as e:
-                return {'status': 'Success', "error": str(e)}, 400
-
-        except Exception as e:
-            return {'Error': str(e)}, 400
 
 
 class InvProduct(Resource):
-    def get(self):
-        try:
-            data = request.get_json()
-            token = data.get('token')
-            sproc_result_array, result_args = is_token_valid(token)
-            client_db_details = [sproc_result for sproc_result in sproc_result_array[0]]
-            
-            client_db_connection = connect_to_database(user=client_db_details[2], 
-                                                       password=client_db_details[3],
-                                                       database=client_db_details[1],
-                                                       host=client_db_details[4])
-            
-            result_args, cursor = call_stored_procedure(client_db_connection, 
-                                                    'sproc_inv_product_grid',
-                                                    request.headers.get('session_id'), 
-                                                    request.headers.get('user_id'),
-                                                    110001, 1, 1, 0, 0, 0)
-            sproc_result = sproc_response(cursor)
-            if not sproc_result:
-                return error_response(code=404, type='Not Found', 
-                                      message='product not found', 
-                                      fbtrace_id=None), 404
 
-            dropdown_data = [{'product': each_product[0], 'product_type': each_product[1], 'entity_id': each_product[4]}
-                                for each_product in sproc_result]
-            
-            return {'status': 'Success', 'brands': dropdown_data}, 200
-            
+    @fn_make_client_db_connection()
+    @fn_check_screen_permission()
+    def get(self, *args, **kwargs):
+        try:
+            debug_sproc = request.headers.get('debug_sproc')
+            audit_screen_visit = request.headers.get('audit_screen_visit')
+
+            account_lkp_output_params = [0, 0, 0]
+            sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                                 'sproc_inv_product_grid',
+                                                                 kwargs['session_id'],
+                                                                 kwargs['user_id'],
+                                                                 kwargs['screen_id'],
+                                                                 debug_sproc,
+                                                                 audit_screen_visit,
+                                                                 *account_lkp_output_params)
+
+            sproc_result_args_type = isinstance(sproc_result_args, str)
+            if sproc_result_args_type == True and cursor == 400:
+                return {'status': 'Failure', 'data': sproc_result_args}, 400
+            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
+            elif sproc_result_args[5] == 1:
+                return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
+            else:
+                sproc_result_sets = fn_sproc_response(cursor)
+
+                return {'status': 'Success', 'data': sproc_result_sets}, 200
+
         except Exception as e:
             return {'Error': str(e)}, 400
-        
-    def post(self):
+
+
+    @fn_make_client_db_connection()
+    @fn_check_screen_permission()
+    def post(self, *args, **kwargs):
         try:
             data = request.get_json()
-            token = request.headers.get('token')
-            sproc_result_array, result_args = is_token_valid(token)
-            client_db_details = [sproc_result for sproc_result in sproc_result_array[0]]
-            
-            client_db_connection = connect_to_database(user=client_db_details[2], 
-                                                       password=client_db_details[3],
-                                                       database=client_db_details[1],
-                                                       host=client_db_details[4])
 
-            
+            debug_sproc = request.headers.get('debug_sproc')
+            audit_screen_visit = request.headers.get('audit_screen_visit')
+
+            output_params = [0, 0, 0]
             input_params = [data.get('isactive'), data.get('product_type_id'), data.get('product_name'),
-                            data.get('brand_id'),
-                            data.get('uom_type_id'), data.get('unit_content'), data.get('product_dimensions'),
-                            data.get('isreturnable_item'), data.get('selling_price'), data.get('ledger_account_entity_id'),
-                            data.get('maintain_inventory_flag'),
+                            data.get('brand_id'),data.get('uom_type_id'), data.get('unit_content'),
+                            data.get('product_dimensions'),data.get('isreturnable_item'), data.get('selling_price'),
+                            data.get('ledger_account_entity_id'),data.get('maintain_inventory_flag'),
                             data.get('opening_stock'), data.get('re_order_level'), data.get('start_reminder_months'),
-                            data.get('stop_reminder_months'), data.get('max_reminder_count'), data.get('reminder_sms_text'),
+                            data.get('stop_reminder_months'), data.get('max_reminder_count'),data.get('reminder_sms_text'),
                             data.get('reminder_email_text')]
 
-            result_args, cursor = call_stored_procedure(client_db_connection, 
-                                                        'sproc_inv_product_dml_ins', 
-                                                        *input_params,
-                                                        request.headers.get('session_id'),
-                                                        request.headers.get('user_id'), 
-                                                        40004, 1, 1, 0, 0, 0)
+            sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                                 'sproc_inv_product_dml_ins',
+                                                                 *input_params,
+                                                                 kwargs['session_id'],
+                                                                 kwargs['user_id'],
+                                                                 kwargs['screen_id'],
+                                                                 debug_sproc,
+                                                                 audit_screen_visit,
+                                                                 *output_params)
 
-            print('Result args: ', result_args[-3: -2])
-            if result_args[-3: -2][0] is not None:
-                return error_response(code=400, type='Bad Request', 
-                                      message=result_args[-1:][0], 
-                                      fbtrace_id=None), 400
-
-            return {'message': 'Product added successfully'}, 201
+            sproc_result_args_type = isinstance(sproc_result_args, str)
+            if sproc_result_args_type == True and cursor == 400:
+                return {'status': 'Failure', 'data': sproc_result_args}, 400
+            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
+            elif sproc_result_args[5] == 1:
+                return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
+            else:
+                return {'status': 'Success', 'data': "Product added successfully"}, 200
             
         except Exception as e:
             return {'Error': str(e)}, 400
 
-        
-    def put(self):
+
+    @fn_make_client_db_connection()
+    @fn_check_screen_permission()
+    def put(self, *args, **kwargs):
         try:
             data = request.get_json()
-            token = request.headers.get('token')
-            
-            sproc_result_array, result_args = is_token_valid(token)
-            client_db_details = [sproc_result for sproc_result in sproc_result_array[0]]
-            
-            client_db_connection = connect_to_database(user=client_db_details[2], 
-                                                       password=client_db_details[3],
-                                                       database=client_db_details[1],
-                                                       host=client_db_details[4])
 
-            
-            input_params = [data.get('entity_id'), data.get('isactive'), data.get('product_type_id'), 
+            debug_sproc = request.headers.get('debug_sproc')
+            audit_screen_visit = request.headers.get('audit_screen_visit')
+
+            output_params = [0, 0, 0]
+            input_params = [data.get('entity_id'), data.get('isactive'), data.get('product_type_id'),
                             data.get('product_name'), data.get('brand_id'),data.get('uom_type_id'),
                             data.get('unit_content'), data.get('product_dimensions'),
                             data.get('isreturnable_item'), data.get('selling_price'), 
@@ -183,20 +156,55 @@ class InvProduct(Resource):
                             data.get('max_reminder_count'), data.get('reminder_sms_text'),
                             data.get('reminder_email_text')]
 
-            result_args, cursor = call_stored_procedure(client_db_connection, 
-                                                        'sproc_inv_product_dml_upd', 
-                                                        *input_params,
-                                                        request.headers.get('session_id'),
-                                                        request.headers.get('user_id'), 
-                                                        40004, 1, 1, 0, 0, 0)
+            sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                                 'sproc_inv_product_dml_upd',
+                                                                 *input_params,
+                                                                 kwargs['session_id'],
+                                                                 kwargs['user_id'],
+                                                                 kwargs['screen_id'],
+                                                                 debug_sproc,
+                                                                 audit_screen_visit,
+                                                                 *output_params)
 
-            print('Result args: ', result_args[-3: -2])
-            if result_args[-3: -2][0] is not None:
-                return error_response(code=400, type='Bad Request', 
-                                      message=result_args[-1:][0], 
-                                      fbtrace_id=None), 400
+            sproc_result_args_type = isinstance(sproc_result_args, str)
+            if sproc_result_args_type == True and cursor == 400:
+                return {'status': 'Failure', 'data': sproc_result_args}, 400
+            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
+            elif sproc_result_args[5] == 1:
+                return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
+            else:
+                return {'status': 'Success', 'data': "Product updated successfully"}, 201
+        except Exception as e:
+            return {'Error': str(e)}, 400
 
-            return {'message': 'Product update successfully'}, 201
-            
+
+    @fn_make_client_db_connection()
+    @fn_check_screen_permission()
+    def delete(self, *args, **kwargs):
+        try:
+            entity_id = int(request.headers.get('entity_id'))
+            debug_sproc = request.headers.get('debug_sproc')
+            audit_screen_visit = request.headers.get('audit_screen_visit')
+
+            output_params = [0, 0, 0]
+            sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                                 'sproc_inv_product_dml_del',
+                                                                 entity_id,
+                                                                 kwargs['session_id'],
+                                                                 kwargs['user_id'],
+                                                                 kwargs['screen_id'],
+                                                                 debug_sproc,
+                                                                 audit_screen_visit,
+                                                                 *output_params)
+
+            sproc_result_args_type = isinstance(sproc_result_args, str)
+            if sproc_result_args_type == True and cursor == 400:
+                return {'status': 'Failure', 'data': sproc_result_args}, 400
+            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
+            elif sproc_result_args[5] == 1:
+                return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
+            else:
+                return {'status': 'Success', 'result': "Product deleted successfully"}, 200
+
         except Exception as e:
             return {'Error': str(e)}, 400
