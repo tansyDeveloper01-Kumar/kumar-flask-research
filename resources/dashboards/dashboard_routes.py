@@ -2,5 +2,5 @@
 
 from .clientDashboard import OrgClientDashboard
 
-def org_client_dashboard_initialize_routes(api):
+def fn_org_client_dashboard_initialize_routes(api):
     api.add_resource(OrgClientDashboard, '/api/v1/client-dashboard')

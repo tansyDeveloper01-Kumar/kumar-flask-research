@@ -1,18 +1,14 @@
 from flask_restful import Resource
 from flask import request
 
-from resources.db.dbConnect import connect_to_database, is_token_valid
-
-from resources.db.executeSProc import call_stored_procedure, sproc_response, \
-                                   error_response
-
-from resources.utils.decorators.screenPermission import check_screen_permission
-from resources.utils.decorators.authVerification import check_auth_verification
+from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response
+from resources.utils.decorators.clientDBConnection import fn_make_client_db_connection
+from resources.utils.decorators.screenPermission import fn_check_screen_permission
 
 class OrgClientDashboard(Resource):
 
-    @check_screen_permission(screen_name = "products")
-    @check_auth_verification()
+    @fn_make_client_db_connection()
+    @fn_check_screen_permission()
     def get(self, *args, **kwargs):
         try:
             data = request.get_json()
@@ -21,21 +17,30 @@ class OrgClientDashboard(Resource):
             end_date = data.get('end_date')
             client_entity_id = int(data.get('client_entity_id'))
 
-            iparams = [start_date, end_date, client_entity_id,
-                       request.headers.get('session_id'),
-                       request.headers.get('user_id'), 110001, 1, 1]
+            debug_sproc = request.headers.get('debug_sproc')
+            audit_screen_visit = request.headers.get('audit_screen_visit')
 
-            oparams = [None, None, None, None,None, None, None, None,None,None,None]
+            input_params = [start_date, end_date, client_entity_id, kwargs['session_id'],kwargs['user_id'],
+                       kwargs['screen_id'], debug_sproc, audit_screen_visit]
 
-            result_args, cursor = call_stored_procedure(kwargs['client_db_connection'], 
-                                                    'sproc_org_rpt_dashboard_client',
-                                                    *iparams, *oparams)
-            
-            sproc_result = []
-            for result in cursor.stored_results():
-                sproc_result.append(result.fetchall())
+            output_params = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+            sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                                 'sproc_org_rpt_dashboard_client',
+                                                                 *input_params, *output_params)
+
+            sproc_result_args_type = isinstance(sproc_result_args, str)
+            if sproc_result_args_type == True and cursor == 400:
+                return {'status': 'Failure', 'data': sproc_result_args}, 400
+            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
+            elif sproc_result_args[5] == 1:
+                return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
+            else:
+                sproc_result = []
+                for result in cursor.stored_results():
+                    sproc_result.append(result.fetchall())
                         
-            return {'status': 'Success', 'brands': sproc_result}, 200
+            return {'status': 'Success', 'data': sproc_result}, 200
             
         except Exception as e:
             return {'Error': str(e)}, 400
