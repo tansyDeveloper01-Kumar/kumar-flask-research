@@ -5,7 +5,7 @@ from resources.db.dbConnect import (fn_sama_get_client_DB_details,
                                     fn_connect_client_db, fn_close_db_connection)
 
 from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response
-from resources.utils.crypto.crypto import fn_decrypt
+from resources.utils.crypto.crypto import fn_decrypt, fn_hash
 
 
 class clsLogin(Resource):
@@ -15,6 +15,8 @@ class clsLogin(Resource):
             data = request.get_json()
             user_id = data.get('domain_name')
             password = data.get('password')
+            hash_password = fn_hash(password)
+
             login_id, domain_name = user_id.split('@', 1)
 
             sproc_sama_result_sets, sproc_sama_result_args = fn_sama_get_client_DB_details(user_domain_name=domain_name)
@@ -45,7 +47,7 @@ class clsLogin(Resource):
                 sproc_result_args, cursor = fn_call_stored_procedure(client_db_connection,
                                                             'sproc_sec_login_v2', 
                                                             login_id, 
-                                                            password,
+                                                            hash_password,
                                                             request.remote_addr, 
                                                             "desktop", 
                                                             token, *output_params)

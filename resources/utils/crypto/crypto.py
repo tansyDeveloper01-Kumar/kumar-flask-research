@@ -9,7 +9,7 @@ def fn_encrypt(secret):
 
   cipher = f.encrypt(secret_byte)
 
-  return str(cipher)
+  return cipher
 
 def fn_decrypt(cipher):
     x = os.getenv("MX")
@@ -20,3 +20,6 @@ def fn_decrypt(cipher):
     key = f.decrypt(cipher_byte).decode()
 
     return key
+
+def fn_hash(key):
+    return hash(key)
