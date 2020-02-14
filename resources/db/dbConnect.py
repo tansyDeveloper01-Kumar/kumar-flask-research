@@ -1,5 +1,4 @@
 import mysql.connector
-from mysql.connector import Error
 import os
 
 from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response
@@ -24,7 +23,7 @@ def fn_sama_get_client_DB_details(user_domain_name):
             sproc_result_sets = fn_sproc_response(cursor)
             fn_close_db_connection(connection, cursor)
             return sproc_result_sets, sproc_result_args
-    except Error as e:
+    except mysql.connector.Error as e:
         return str(e)
 
 
@@ -37,7 +36,7 @@ def fn_connect_client_db(**kwargs):
                                              user=kwargs['user'],
                                              password=kwargs['password'])
         return connection
-    except Error as error:
+    except mysql.connector.Error as error:
         return str(error)
 
 

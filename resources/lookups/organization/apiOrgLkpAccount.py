@@ -16,18 +16,20 @@ class clsLkpOrgAccount(Resource):
             audit_screen_visit = request.headers.get('audit_screen_visit')
 
             account_lkp_output_params = [0, 0, 0]
-            sproc_result_args, cursor = fn_call_stored_procedure(
-                kwargs['client_db_connection'],
-                'sproc_org_lkp_account',
-                kwargs['session_id'],
-                kwargs['user_id'],
-                kwargs['screen_id'],
-                debug_sproc,
-                audit_screen_visit,
-                *account_lkp_output_params)
+            sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                                'sproc_org_lkp_account',
+                                                                kwargs['session_id'],
+                                                                kwargs['user_id'],
+                                                                kwargs['screen_id'],
+                                                                debug_sproc,
+                                                                audit_screen_visit,
+                                                                *account_lkp_output_params)
 
+            sproc_result_args_type = isinstance(sproc_result_args, str)
+            if sproc_result_args_type == True and cursor == 400:
+                return {'status': 'Failure', 'data': sproc_result_args}, 400
             # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
-            if sproc_result_args[5] == 1:
+            elif sproc_result_args[5] == 1:
                 return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
             else:
                 sproc_result_sets = fn_sproc_response(cursor)

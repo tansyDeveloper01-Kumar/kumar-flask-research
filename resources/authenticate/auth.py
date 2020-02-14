@@ -20,7 +20,7 @@ class clsLogin(Resource):
             login_id, domain_name = user_id.split('@', 1)
 
             sproc_sama_result_sets, sproc_sama_result_args = fn_sama_get_client_DB_details(user_domain_name=domain_name)
-            
+
             if sproc_sama_result_args == 400:
                 return {'status': 'Failure', 'data': sproc_sama_result_sets}, 400
             elif sproc_sama_result_args[3] == 1:
@@ -48,7 +48,7 @@ class clsLogin(Resource):
                 sproc_result_args, cursor = fn_call_stored_procedure(client_db_connection,
                                                             'sproc_sec_login_v2', 
                                                             login_id, 
-                                                            hash_password,
+                                                            password,
                                                             request.remote_addr, 
                                                             "desktop", 
                                                             token, *output_params)

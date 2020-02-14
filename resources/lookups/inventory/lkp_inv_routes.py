@@ -5,7 +5,7 @@ from .apiInvLkpManufacture import clsInvLkpManufacture
 from .apiInvLkpProductType import clsInvLkpProductType
 from .apiInvLkpUnitOfMeasure import clsInvLkpUnitOfMeasure
 
-def lkp_inv_initialize_routes(api):
+def fn_lkp_inv_initialize_routes(api):
     api.add_resource(clsInvLkpBrand, '/api/lkp/v1/brand-items')
     api.add_resource(clsInvLkpManufacture, '/api/lkp/v1/manufacture')
     api.add_resource(clsInvLkpProductType, '/api/lkp/v1/product-type')

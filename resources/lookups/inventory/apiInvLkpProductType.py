@@ -1,33 +1,40 @@
 from flask_restful import Resource
 from flask import request
 
-from resources.db.dbConnect import connect_to_database, is_token_valid
-
-from resources.db.executeSProc import call_stored_procedure, sproc_response, \
-                                   error_response
-
-from resources.utils.decorators.screenPermission import check_screen_permission
-from resources.utils.decorators.authVerification import check_auth_verification
+from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response
+from resources.utils.decorators.clientDBConnection import fn_make_client_db_connection
+from resources.utils.decorators.screenPermission import fn_check_screen_permission
 
 
 class clsInvLkpProductType(Resource):
 
-    @check_screen_permission(screen_name = "products")
-    @check_auth_verification()
+    @fn_make_client_db_connection()
+    @fn_check_screen_permission()
     def get(self, *args, **kwargs):
         try:
-            result_args, cursor = call_stored_procedure(kwargs['client_db_connection'], 
-                                                    'sproc_inv_lkp_product_type',
-                                                    request.headers.get('session_id'), 
-                                                    request.headers.get('user_id'),
-                                                    110001, 1, 1, 0, 0, 0)
-            sproc_result = sproc_response(cursor)
-            if not sproc_result:
-                return error_response(code=404, type='Not Found', message='Brands not found', fbtrace_id=None), 404
-            dropdown_data = [{'brand_id': each_product[0], 'brand': each_product[1]} for each_product in sproc_result]
-            
-            return {'status': 'Success', 'brands': dropdown_data}, 200
-            
+            debug_sproc = request.headers.get('debug_sproc')
+            audit_screen_visit = request.headers.get('audit_screen_visit')
+
+            account_lkp_output_params = [0, 0, 0]
+            sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                                 'sproc_inv_lkp_product_type',
+                                                                 kwargs['session_id'],
+                                                                 kwargs['user_id'],
+                                                                 kwargs['screen_id'],
+                                                                 debug_sproc,
+                                                                 audit_screen_visit,
+                                                                 *account_lkp_output_params)
+
+            sproc_result_args_type = isinstance(sproc_result_args, str)
+            if sproc_result_args_type == True and cursor == 400:
+                return {'status': 'Failure', 'data': sproc_result_args}, 400
+            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
+            elif sproc_result_args[5] == 1:
+                return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
+            else:
+                sproc_result_sets = fn_sproc_response(cursor)
+                return {'status': 'Success', 'data': sproc_result_sets}, 200
+
         except Exception as e:
             return {'Error': str(e)}, 400
-        
+
