@@ -1,5 +1,7 @@
 from flask_restful import Resource
-from flask import request, jsonify
+from flask import request, Response, jsonify
+import datetime
+import json
 
 from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response
 from resources.utils.decorators.clientDBConnection import fn_make_client_db_connection
@@ -36,7 +38,8 @@ class clsSlsRptPdfSalesInvoice(Resource):
                 for result in cursor.stored_results():
                     sproc_result.append(result.fetchall())
 
-            return {'status': 'Success', 'data': str(sproc_result)}, 200
+            return jsonify({"data": sproc_result})
 
         except Exception as e:
             return {'Error': str(e)}, 400
+
