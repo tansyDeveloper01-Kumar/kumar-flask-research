@@ -6,6 +6,7 @@ from resources.authenticate.sys_auth_routes import fn_sys_auth_initialize_routes
 from resources.inventory.inv_product_routes import fn_inv_product_initialize_routes
 from resources.dashboards.dashboard_routes import fn_org_client_dashboard_initialize_routes
 from resources.sales.sls_routes import fn_sls_invoice_initialize_routes
+from resources.reports.sales.sales_routes import fn_reports_initialize_routes
 
 # Lookups paths
 from resources.lookups.inventory.lkp_inv_routes import fn_lkp_inv_initialize_routes
@@ -20,6 +21,7 @@ fn_sys_auth_initialize_routes(api)
 fn_inv_product_initialize_routes(api)
 fn_org_client_dashboard_initialize_routes(api)
 fn_sls_invoice_initialize_routes(api)
+fn_reports_initialize_routes(api)
 
 fn_lkp_inv_initialize_routes(api)
 fn_lkp_org_initialize_routes(api)
