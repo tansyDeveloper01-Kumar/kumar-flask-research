@@ -160,8 +160,8 @@ class InvProduct(Resource):
             if sproc_result_args_type == True and cursor == 400:
                 return {'status': 'Failure', 'data': sproc_result_args}, 400
             # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
-            elif sproc_result_args[5] == 1:
-                return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
+            elif sproc_result_args[-3] == 1:
+                return {'status': 'Failure', 'data': sproc_result_args[-1]}, 200
             else:
                 return {'status': 'Success', 'data': "Product updated successfully"}, 201
         except Exception as e:
