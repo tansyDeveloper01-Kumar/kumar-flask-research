@@ -4,6 +4,7 @@ from datetime import datetime, date
 from time import time, struct_time, mktime
 import decimal
 
+# class for serializer
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, datetime):
