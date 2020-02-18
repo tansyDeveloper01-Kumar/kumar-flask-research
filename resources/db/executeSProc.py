@@ -1,6 +1,21 @@
 import mysql.connector
 import json
-import datetime
+from datetime import datetime, date
+from time import time, struct_time, mktime
+import decimal
+
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, datetime):
+            return str(o)
+        if isinstance(o, date):
+            return str(o)
+        if isinstance(o, decimal.Decimal):
+            return float(o)
+        if isinstance(o, struct_time):
+            return datetime.fromtimestamp(mktime(o))
+        # Any other serializer if needed
+        return super(CustomJSONEncoder, self).default(o)
 
 # execute stored procedure
 def fn_call_stored_procedure(connection, sproc_name, *args):
@@ -27,8 +42,8 @@ def fn_return_sproc_status(sproc_result_args, cursor, screen, functionality):
         return {'status': 'Failure', 'data': sproc_result_args[-1]}, 200
     else:
         sproc_result_sets = fn_sproc_response(cursor)
-
-        return {'status': 'Success', 'data': sproc_result_sets, 'message': screen+functionality+"Successfully"}, 200
+        result = json.dumps(sproc_result_sets, cls=CustomJSONEncoder)
+        return {'status': 'Success', 'data': result, 'message': screen+functionality+"Successfully"}, 200
 
 def fn_return_sproc_datefield_status(sproc_result_args, cursor, screen, functionality):
     sproc_result_args_type = isinstance(sproc_result_args, str)
@@ -39,11 +54,7 @@ def fn_return_sproc_datefield_status(sproc_result_args, cursor, screen, function
         return {'status': 'Failure', 'data': sproc_result_args[-1]}, 200
     else:
         sproc_result_sets = fn_sproc_response(cursor)
-        res = json.dumps(sproc_result_sets, default=fn_date_converter)
-        return {'status': 'Success', 'data': res, 'message': screen+functionality+"Successfully"}, 200
+        result = json.dumps(sproc_result_sets, cls=CustomJSONEncoder)
+        return {'status': 'Success', 'data': result, 'message': screen+functionality+"Successfully"}, 200
 
-
-def fn_date_converter(data):
-    if isinstance(data, datetime.datetime):
-        return data.__str__()
 
