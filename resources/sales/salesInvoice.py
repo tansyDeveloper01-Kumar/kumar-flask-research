@@ -5,7 +5,7 @@ from datetime import datetime
 import datetime
 
 from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response, \
-                                      fn_return_sproc_status, fn_return_sproc_datefield_status
+                                      fn_return_sproc_status, fn_return_sproc_single_result_sets
 from resources.utils.decorators.clientDBConnection import fn_make_client_db_connection
 from resources.utils.decorators.screenPermission import fn_check_screen_permission
 
@@ -74,7 +74,8 @@ class clsSlsInvoice(Resource):
                                                                  audit_screen_visit,
                                                                  *output_params)
 
-            return fn_return_sproc_datefield_status(sproc_result_args, cursor, "Sales Invoice data ", "Fetched ")
+            return fn_return_sproc_single_result_sets(sproc_result_args=sproc_result_args, cursor=cursor,
+                                                      screen="Sales Invoice  ", functionality="data Fetched ")
 
         except Exception as e:
             return {'Error': str(e)}, 400
