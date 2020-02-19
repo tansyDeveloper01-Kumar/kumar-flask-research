@@ -1,7 +1,9 @@
 from flask_restful import Resource
 from flask import request
 
-from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response, fn_return_sproc_status
+from resources.db.executeSProc import fn_call_stored_procedure, fn_return_sproc_status, \
+                                      fn_return_sproc_single_result_sets, fn_return_sproc_ddl, \
+                                      fn_sproc_multiple_result_sets_response
 from resources.utils.decorators.clientDBConnection import fn_make_client_db_connection
 from resources.utils.decorators.screenPermission import fn_check_screen_permission
 
@@ -34,7 +36,7 @@ class InvProductDetails(Resource):
             elif sproc_result_args[5] == 1:
                 return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
             else:
-                sproc_result_sets = fn_sproc_response(cursor)
+                sproc_result_sets = fn_sproc_multiple_result_sets_response(cursor)
 
                 product_details = [{'product': each_product[0],
                                     'product_type_entity_id': each_product[1],
@@ -67,20 +69,19 @@ class InvProduct(Resource):
     @fn_check_screen_permission()
     def get(self, *args, **kwargs):
         try:
-            debug_sproc = request.headers.get('debug_sproc')
-            audit_screen_visit = request.headers.get('audit_screen_visit')
+            debug_sproc = int(request.headers.get('debug_sproc'))
+            audit_screen_visit = int(request.headers.get('audit_screen_visit'))
 
-            account_lkp_output_params = [0, 0, 0]
+            input_params = [kwargs['session_id'], kwargs['user_id'],
+                            kwargs['screen_id'], debug_sproc, audit_screen_visit]
+            output_params = [0, 0, 0]
             sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
                                                                  'sproc_inv_product_grid',
-                                                                 kwargs['session_id'],
-                                                                 kwargs['user_id'],
-                                                                 kwargs['screen_id'],
-                                                                 debug_sproc,
-                                                                 audit_screen_visit,
-                                                                 *account_lkp_output_params)
+                                                                 *input_params,
+                                                                 *output_params)
 
-            return fn_return_sproc_status(sproc_result_args, cursor, "Products ", "Fetched ")
+            return fn_return_sproc_single_result_sets(sproc_result_args=sproc_result_args, cursor=cursor,
+                                                      functionality="Products data Fetched successfully")
         except Exception as e:
             return {'Error': str(e)}, 400
 
@@ -91,8 +92,8 @@ class InvProduct(Resource):
         try:
             data = request.get_json()
 
-            debug_sproc = request.headers.get('debug_sproc')
-            audit_screen_visit = request.headers.get('audit_screen_visit')
+            debug_sproc = int(request.headers.get('debug_sproc'))
+            audit_screen_visit = int(request.headers.get('audit_screen_visit'))
 
             output_params = [0, 0, 0]
             input_params = [data.get('isactive'), data.get('product_type_id'), data.get('product_name'),
@@ -101,27 +102,16 @@ class InvProduct(Resource):
                             data.get('ledger_account_entity_id'),data.get('maintain_inventory_flag'),
                             data.get('opening_stock'), data.get('re_order_level'), data.get('start_reminder_months'),
                             data.get('stop_reminder_months'), data.get('max_reminder_count'),data.get('reminder_sms_text'),
-                            data.get('reminder_email_text')]
+                            data.get('reminder_email_text'),kwargs['session_id'],kwargs['user_id'],kwargs['screen_id'],
+                            debug_sproc,audit_screen_visit]
 
             sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
                                                                  'sproc_inv_product_dml_ins',
                                                                  *input_params,
-                                                                 kwargs['session_id'],
-                                                                 kwargs['user_id'],
-                                                                 kwargs['screen_id'],
-                                                                 debug_sproc,
-                                                                 audit_screen_visit,
                                                                  *output_params)
 
-            sproc_result_args_type = isinstance(sproc_result_args, str)
-            if sproc_result_args_type == True and cursor == 400:
-                return {'status': 'Failure', 'data': sproc_result_args}, 400
-            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
-            elif sproc_result_args[5] == 1:
-                return {'status': 'Failure', 'data': sproc_result_args[7]}, 200
-            else:
-                return {'status': 'Success', 'data': "Product added successfully"}, 200
-            
+            return fn_return_sproc_ddl(sproc_result_args=sproc_result_args, cursor=cursor,
+                                       functionality="Products saved successfully ")
         except Exception as e:
             return {'Error': str(e)}, 400
 
@@ -132,8 +122,8 @@ class InvProduct(Resource):
         try:
             data = request.get_json()
 
-            debug_sproc = request.headers.get('debug_sproc')
-            audit_screen_visit = request.headers.get('audit_screen_visit')
+            debug_sproc = int(request.headers.get('debug_sproc'))
+            audit_screen_visit = int(request.headers.get('audit_screen_visit'))
 
             output_params = [0, 0, 0]
             input_params = [data.get('entity_id'), data.get('isactive'), data.get('product_type_id'),
@@ -144,26 +134,16 @@ class InvProduct(Resource):
                             data.get('opening_stock'), data.get('re_order_level'), 
                             data.get('start_reminder_months'),data.get('stop_reminder_months'), 
                             data.get('max_reminder_count'), data.get('reminder_sms_text'),
-                            data.get('reminder_email_text')]
+                            data.get('reminder_email_text'),kwargs['session_id'],kwargs['user_id'],
+                            kwargs['screen_id'],debug_sproc,audit_screen_visit]
 
             sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
                                                                  'sproc_inv_product_dml_upd',
                                                                  *input_params,
-                                                                 kwargs['session_id'],
-                                                                 kwargs['user_id'],
-                                                                 kwargs['screen_id'],
-                                                                 debug_sproc,
-                                                                 audit_screen_visit,
                                                                  *output_params)
 
-            sproc_result_args_type = isinstance(sproc_result_args, str)
-            if sproc_result_args_type == True and cursor == 400:
-                return {'status': 'Failure', 'data': sproc_result_args}, 400
-            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
-            elif sproc_result_args[-3] == 1:
-                return {'status': 'Failure', 'data': sproc_result_args[-1]}, 200
-            else:
-                return {'status': 'Success', 'data': "Product updated successfully"}, 201
+            return fn_return_sproc_ddl(sproc_result_args=sproc_result_args, cursor=cursor,
+                                       functionality="Products updated successfully ")
         except Exception as e:
             return {'Error': str(e)}, 400
 
@@ -173,20 +153,18 @@ class InvProduct(Resource):
     def delete(self, *args, **kwargs):
         try:
             entity_id = int(request.headers.get('entity_id'))
-            debug_sproc = request.headers.get('debug_sproc')
-            audit_screen_visit = request.headers.get('audit_screen_visit')
+            debug_sproc = int(request.headers.get('debug_sproc'))
+            audit_screen_visit = int(request.headers.get('audit_screen_visit'))
 
+            input_params = [entity_id, kwargs['session_id'],kwargs['user_id'],
+                            kwargs['screen_id'],debug_sproc,audit_screen_visit]
             output_params = [0, 0, 0]
             sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
                                                                  'sproc_inv_product_dml_del',
-                                                                 entity_id,
-                                                                 kwargs['session_id'],
-                                                                 kwargs['user_id'],
-                                                                 kwargs['screen_id'],
-                                                                 debug_sproc,
-                                                                 audit_screen_visit,
+                                                                 *input_params,
                                                                  *output_params)
 
-            return fn_return_sproc_status(sproc_result_args, cursor, "Product ", "Deleted ")
+            return fn_return_sproc_ddl(sproc_result_args=sproc_result_args, cursor=cursor,
+                                       functionality="Products deleted successfully ")
         except Exception as e:
             return {'Error': str(e)}, 400
