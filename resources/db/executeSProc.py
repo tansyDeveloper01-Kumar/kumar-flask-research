@@ -35,17 +35,21 @@ def fn_get_sproc_errors(**kwargs):
         return 'Success', kwargs['cursor'], 200
 
 def fn_response_data(**kwargs):
-    serialize_result = json.dumps(kwargs['sproc_result_sets'], cls=clsCustomJSONEncoder)
-    deserialize_result = json.loads(serialize_result)
-    return {'status': 'Success',
-            'data': deserialize_result,
-            'message': kwargs['screen'] + kwargs['functionality'] + "Successfully"}, kwargs['status_code']
+    if kwargs['method'] == "GET":
+        serialize_result = json.dumps(kwargs['sproc_result_sets'], cls=clsCustomJSONEncoder)
+        deserialize_result = json.loads(serialize_result)
+        return {'status': 'Success',
+                'data': deserialize_result,
+                'message': kwargs['functionality']
+               }, kwargs['status_code']
+    else:
+        return {'status': 'Success',
+                'message': kwargs['functionality']
+                }, kwargs['status_code']
 
 # return function
-def fn_return_sproc_status(sproc_result_args, cursor, screen, functionality):
-    status, cursor_object, status_code = fn_get_sproc_errors(sproc_result_args, cursor)
-    print(status, cursor_object, status_code)
-    return "hello"
+def fn_return_sproc_status(**kwargs):
+    pass
 
 def fn_return_sproc_single_result_sets(**kwargs):
     status, cursor_object, status_code = fn_get_sproc_errors(**kwargs)
@@ -53,8 +57,10 @@ def fn_return_sproc_single_result_sets(**kwargs):
         return { 'status': status, 'data': cursor_object }, status_code
     else:
         sproc_single_result_set = fn_sproc_response(cursor_object)
-        return fn_response_data(sproc_result_sets=sproc_single_result_set, screen=kwargs['screen'],
-                                functionality=kwargs['functionality'], status_code=status_code)
+        return fn_response_data(sproc_result_sets=sproc_single_result_set,
+                                functionality=kwargs['functionality'],
+                                method="GET",
+                                status_code=status_code)
 
 
 def fn_return_sproc_multiple_result_sets(**kwargs):
@@ -63,8 +69,16 @@ def fn_return_sproc_multiple_result_sets(**kwargs):
         return { 'status': status, 'data': cursor_object }, status_code
     else:
         sproc_multiple_result_sets = fn_sproc_multiple_result_sets_response(cursor_object)
-        return fn_response_data(sproc_result_sets = sproc_multiple_result_sets, screen = kwargs['screen'],
-                                functionality = kwargs['functionality'], status_code = status_code)
+        return fn_response_data(sproc_result_sets = sproc_multiple_result_sets,
+                                functionality = kwargs['functionality'],
+                                method="GET",
+                                status_code = status_code)
 
-
-
+def fn_return_sproc_ddl(**kwargs):
+    status, cursor_object, status_code = fn_get_sproc_errors(**kwargs)
+    if status == "Failure" and status_code == 400:
+        return { 'status': status, 'data': cursor_object }, status_code
+    else:
+        return fn_response_data(functionality = kwargs['functionality'],
+                                method="DDL",
+                                status_code = status_code)

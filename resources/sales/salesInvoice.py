@@ -4,13 +4,14 @@ import json
 from datetime import datetime
 import datetime
 
-from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response, \
-                                      fn_return_sproc_status, fn_return_sproc_single_result_sets
+from resources.db.executeSProc import fn_call_stored_procedure, fn_return_sproc_status, \
+                                      fn_return_sproc_single_result_sets, fn_return_sproc_ddl
 from resources.utils.decorators.clientDBConnection import fn_make_client_db_connection
 from resources.utils.decorators.screenPermission import fn_check_screen_permission
 
-
-
+'''
+Resource for getting sales invoice details
+'''
 class clsSlsInvoiceDetails(Resource):
 
     @fn_make_client_db_connection()
@@ -55,6 +56,9 @@ class clsSlsInvoiceDetails(Resource):
             return {'Error': str(e)}, 400
 
 
+'''
+Resource for sales invoice CRUD
+'''
 class clsSlsInvoice(Resource):
 
     @fn_make_client_db_connection()
@@ -75,7 +79,7 @@ class clsSlsInvoice(Resource):
                                                                  *output_params)
 
             return fn_return_sproc_single_result_sets(sproc_result_args=sproc_result_args, cursor=cursor,
-                                                      screen="Sales Invoice  ", functionality="data Fetched ")
+                                                      functionality="Sales invoice grid data Fetched successfully")
 
         except Exception as e:
             return {'Error': str(e)}, 400
@@ -100,15 +104,8 @@ class clsSlsInvoice(Resource):
                                                                  *input_params,
                                                                  *output_params)
 
-            sproc_result_args_type = isinstance(sproc_result_args, str)
-            if sproc_result_args_type == True and cursor == 400:
-                return {'status': 'Failure', 'data': sproc_result_args}, 400
-            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
-            elif sproc_result_args[-3] == 1:
-                return {'status': 'Failure', 'data': sproc_result_args[-1]}, 200
-            else:
-                return {'status': 'Success', 'data': "Product added successfully"}, 200
-
+            return fn_return_sproc_ddl(sproc_result_args=sproc_result_args, cursor=cursor,
+                                       functionality="Sales invoice saved successfully ")
         except Exception as e:
             return {'Error': str(e)}, 400
 
@@ -134,14 +131,8 @@ class clsSlsInvoice(Resource):
                                                                  *input_params,
                                                                  *output_params)
 
-            sproc_result_args_type = isinstance(sproc_result_args, str)
-            if sproc_result_args_type == True and cursor == 400:
-                return {'status': 'Failure', 'data': sproc_result_args}, 400
-            # sproc_result_args[5] = err_flag & sproc_result_args[7] = err_msg
-            elif sproc_result_args[-3] == 1:
-                return {'status': 'Failure', 'data': sproc_result_args[-1], 'error_step': sproc_result_args[-2]}, 400
-            else:
-                return {'status': 'Success', 'data': "Product updated successfully"}, 201
+            return fn_return_sproc_ddl(sproc_result_args=sproc_result_args, cursor=cursor,
+                                       functionality="Sales invoice updated successfully ")
 
         except Exception as e:
             return {'Error': str(e)}, 400
@@ -166,6 +157,7 @@ class clsSlsInvoice(Resource):
                                                                  audit_screen_visit,
                                                                  *output_params)
 
-            return fn_return_sproc_status(sproc_result_args, cursor, "Product ", "Deleted ")
+            return fn_return_sproc_ddl(sproc_result_args=sproc_result_args, cursor=cursor,
+                                       functionality="Sales invoice deleted successfully ")
         except Exception as e:
             return {'Error': str(e)}, 400
