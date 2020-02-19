@@ -1,9 +1,9 @@
 from flask_restful import Resource
 from flask import request
 
-from resources.db.executeSProc import fn_call_stored_procedure, fn_return_sproc_status, \
-                                      fn_return_sproc_single_result_sets, fn_return_sproc_ddl,\
-                                      fn_sproc_multiple_result_sets_response, fn_get_sproc_errors
+from resources.db.executeSProc import fn_call_stored_procedure, fn_return_sproc_single_result_sets, \
+                                      fn_return_sproc_ddl, fn_sproc_multiple_result_sets_response, \
+                                      fn_get_sproc_errors
 from resources.utils.decorators.clientDBConnection import fn_make_client_db_connection
 from resources.utils.decorators.screenPermission import fn_check_screen_permission
 
