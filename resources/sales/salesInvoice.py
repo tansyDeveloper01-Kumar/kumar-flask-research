@@ -144,3 +144,27 @@ class clsSlsInvoice(Resource):
 
         except Exception as e:
             return {'Error': str(e)}, 400
+
+
+    @fn_make_client_db_connection()
+    @fn_check_screen_permission()
+    def delete(self, *args, **kwargs):
+        try:
+            entity_id = int(request.headers.get('entity_id'))
+            debug_sproc = request.headers.get('debug_sproc')
+            audit_screen_visit = request.headers.get('audit_screen_visit')
+
+            output_params = [0, 0, 0]
+            sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],
+                                                                 'sproc_sls_invoice_dml_del',
+                                                                 entity_id,
+                                                                 kwargs['session_id'],
+                                                                 kwargs['user_id'],
+                                                                 kwargs['screen_id'],
+                                                                 debug_sproc,
+                                                                 audit_screen_visit,
+                                                                 *output_params)
+
+            return fn_return_sproc_status(sproc_result_args, cursor, "Product ", "Deleted ")
+        except Exception as e:
+            return {'Error': str(e)}, 400
