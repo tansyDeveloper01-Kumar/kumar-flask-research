@@ -47,9 +47,6 @@ def fn_response_data(**kwargs):
                 'message': kwargs['functionality']
                 }, kwargs['status_code']
 
-# return function
-def fn_return_sproc_status(**kwargs):
-    pass
 
 def fn_return_sproc_single_result_sets(**kwargs):
     status, cursor_object, status_code = fn_get_sproc_errors(**kwargs)
