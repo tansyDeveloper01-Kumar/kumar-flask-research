@@ -10,6 +10,7 @@ class clsLkpActTaxType(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
+    # get list of tax type, used to populate drop down
     def get(self, *args, **kwargs):
         try:
             sproc_result_args, cursor = fn_call_stored_procedure(kwargs['client_db_connection'],

@@ -9,6 +9,7 @@ class clsOrgClientDashboard(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
+    # get multiple result sets used to populate client dashboard
     def get(self, *args, **kwargs):
         try:
             data = request.get_json()

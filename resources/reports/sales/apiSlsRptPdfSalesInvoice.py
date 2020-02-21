@@ -12,6 +12,7 @@ class clsSlsRptPdfSalesInvoice(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
+    # get details to print PDF sales report listing
     def get(self, *args, **kwargs):
         try:
             entity_id = request.headers.get('entity_id')
