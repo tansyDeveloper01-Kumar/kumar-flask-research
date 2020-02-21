@@ -3,8 +3,8 @@ from flask_restful import Api
 from dotenv import load_dotenv
 
 from resources.authenticate.sys_auth_routes import fn_sys_auth_initialize_routes
-from resources.inventory.inv_product_routes import fn_inv_product_initialize_routes
-from resources.dashboards.dashboard_routes import fn_org_client_dashboard_initialize_routes
+from resources.inventory.inv_routes import fn_inv_product_initialize_routes
+from resources.reports.dashboards.dashboard_routes import fn_org_client_dashboard_initialize_routes
 from resources.sales.sls_routes import fn_sls_invoice_initialize_routes
 from resources.reports.sales.sales_routes import fn_reports_initialize_routes
 
