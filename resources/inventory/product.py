@@ -8,7 +8,7 @@ from resources.utils.decorators.clientDBConnection import fn_make_client_db_conn
 from resources.utils.decorators.screenPermission import fn_check_screen_permission
 
 
-class InvProductDetails(Resource):
+class clsInvProductDetails(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
@@ -56,7 +56,7 @@ class InvProductDetails(Resource):
 
 
 
-class InvProduct(Resource):
+class clsInvProduct(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
