@@ -9,5 +9,5 @@
 # Install the dependencies
 ## pip install -r requirements.txt
 
-# Create .env file
+# Create .env file hola
 ## Contact Admin/CEO for the Database configaration settings
