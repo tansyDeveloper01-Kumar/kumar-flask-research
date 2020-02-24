@@ -29,8 +29,14 @@ class clsLogin(Resource):
                 client_db_details = sproc_sama_result_sets[0]
 
                 if client_db_details[0] is None:
+                    print("-------------")
+                    print("Invalid login")
+                    print("-------------")
                     return {'status': 'Failure', 'data': 'Invalid login' }, 400
                 if not client_db_details:
+                    print("-------------")
+                    print("Client database not found")
+                    print("-------------")
                     return {'status': 'Failure', 'data': 'Client database not found'}, 400
 
                 token = client_db_details[0]
@@ -73,10 +79,19 @@ class clsLogin(Resource):
                         'database': client_db_details[1],
                         'host': client_db_details[4]
                     }
+                    print("-------------")
+                    print(result_json)
+                    print("-------------")
                     return { 'Status': sproc_result_args[-4], 'data': result_json}, 200
                 else:
+                    print("-------------")
+                    print(sproc_result_args[-1])
+                    print("-------------")
                     return { 'Status': 'Failure', 'data': sproc_result_args[-4], 'error': sproc_result_args[-1]}, 400
         except Exception as error:
+            print("-------------")
+            print(error)
+            print("-------------")
             return {"error_response": error}, 400
         
 
