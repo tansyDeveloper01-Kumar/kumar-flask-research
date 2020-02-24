@@ -9,10 +9,16 @@ from resources.utils.crypto.crypto import fn_decrypt, fn_hash
 
 
 class clsLogin(Resource):
-    
+
     def get(self):
+        return {'status': 'success', 'data': 'get method'}
+    
+    def post(self):
         try:
             data = request.get_json()
+            print("-------------")
+            print("data", data)
+            print("-------------")
             user_id = data.get('domain_name')
             password = data.get('password')
             hash_password = fn_hash(data.get('password'))
@@ -22,8 +28,14 @@ class clsLogin(Resource):
             sproc_sama_result_sets, sproc_sama_result_args = fn_sama_get_client_DB_details(user_domain_name=domain_name)
 
             if sproc_sama_result_args == 400:
+                print("-------------")
+                print(sproc_sama_result_sets)
+                print("-------------")
                 return {'status': 'Failure', 'data': sproc_sama_result_sets}, 400
             elif sproc_sama_result_args[-3] == 1:
+                print("-------------")
+                print(sproc_sama_result_args[-1])
+                print("-------------")
                 return {'status': 'Failure', 'data': sproc_sama_result_args[-1] }, 400
             else:
                 client_db_details = sproc_sama_result_sets[0]
