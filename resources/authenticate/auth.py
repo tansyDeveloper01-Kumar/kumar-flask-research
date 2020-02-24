@@ -9,10 +9,16 @@ from resources.utils.crypto.crypto import fn_decrypt, fn_hash
 
 
 class clsLogin(Resource):
-    
+
     def get(self):
+        return {'status': 'success', 'data': 'get method'}
+    
+    def post(self):
         try:
             data = request.get_json()
+            print("-------------")
+            print("data", data)
+            print("-------------")
             user_id = data.get('domain_name')
             password = data.get('password')
             hash_password = fn_hash(data.get('password'))
@@ -22,15 +28,27 @@ class clsLogin(Resource):
             sproc_sama_result_sets, sproc_sama_result_args = fn_sama_get_client_DB_details(user_domain_name=domain_name)
 
             if sproc_sama_result_args == 400:
+                print("-------------")
+                print(sproc_sama_result_sets)
+                print("-------------")
                 return {'status': 'Failure', 'data': sproc_sama_result_sets}, 400
-            elif sproc_sama_result_args[3] == 1:
-                return {'status': 'Failure', 'data': sproc_sama_result_args[5] }, 400
+            elif sproc_sama_result_args[-3] == 1:
+                print("-------------")
+                print(sproc_sama_result_args[-1])
+                print("-------------")
+                return {'status': 'Failure', 'data': sproc_sama_result_args[-1] }, 400
             else:
                 client_db_details = sproc_sama_result_sets[0]
 
                 if client_db_details[0] is None:
+                    print("-------------")
+                    print("Invalid login")
+                    print("-------------")
                     return {'status': 'Failure', 'data': 'Invalid login' }, 400
                 if not client_db_details:
+                    print("-------------")
+                    print("Client database not found")
+                    print("-------------")
                     return {'status': 'Failure', 'data': 'Client database not found'}, 400
 
                 token = client_db_details[0]
@@ -54,8 +72,8 @@ class clsLogin(Resource):
                                                             token, *output_params)
                 
                 sproc_result_sets = fn_sproc_response(cursor)
-                                
-                if sproc_result_args[10] == "Success":
+
+                if sproc_result_args[-4] == "Success":
                     get_module_names = [result_set[0] for result_set in sproc_result_sets]
 
                     fn_close_db_connection(client_db_connection, cursor)
@@ -73,10 +91,19 @@ class clsLogin(Resource):
                         'database': client_db_details[1],
                         'host': client_db_details[4]
                     }
-                    return { 'Status': sproc_result_args[10], 'data': result_json}, 200
+                    print("-------------")
+                    print(result_json)
+                    print("-------------")
+                    return { 'Status': sproc_result_args[-4], 'data': result_json}, 200
                 else:
-                    return { 'Status': 'Failure', 'data': sproc_result_args[10]}, 400
+                    print("-------------")
+                    print(sproc_result_args[-1])
+                    print("-------------")
+                    return { 'Status': 'Failure', 'data': sproc_result_args[-4], 'error': sproc_result_args[-1]}, 400
         except Exception as error:
+            print("-------------")
+            print(error)
+            print("-------------")
             return {"error_response": error}, 400
         
 

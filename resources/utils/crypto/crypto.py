@@ -18,16 +18,16 @@ def fn_decrypt(cipher):
 
     cipher_byte = cipher.encode('utf-8')
 
-    key = f.decrypt(cipher_byte).decode()
+    secret = f.decrypt(cipher_byte).decode()
 
-    return key
+    return secret
 
-def fn_hash(key):
+def fn_hash(secret):
     try:
-        m = hashlib.sha256()
-        key_byte = key.encode('utf-8')
-        m.update(key_byte)
-        hash_sha256_key = m.hexdigest()
+        hash_method = hashlib.sha256()
+        secret_byte = secret.encode('utf-8')
+        hash_method.update(secret_byte)
+        hash_sha256_key = hash_method.hexdigest()
         return str(hash_sha256_key)
     except Exception as e:
         return str(e)

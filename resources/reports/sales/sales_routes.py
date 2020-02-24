@@ -1,4 +1,4 @@
-# ~/mysql-flask-connector/resources/inventory/inv_product_routes.py
+# ~/mysql-flask-connector/resources/inventory/inv_routes.py
 
 from .apiSlsRptPdfSalesInvoice import clsSlsRptPdfSalesInvoice
 

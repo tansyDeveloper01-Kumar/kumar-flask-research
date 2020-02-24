@@ -8,10 +8,11 @@ from resources.utils.decorators.clientDBConnection import fn_make_client_db_conn
 from resources.utils.decorators.screenPermission import fn_check_screen_permission
 
 
-class InvProductDetails(Resource):
+class clsInvProductDetails(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
+    # get single product details
     def get(self, *args, **kwargs):
         try:
             entity_id = int(request.headers.get('entity_id'))
@@ -56,10 +57,11 @@ class InvProductDetails(Resource):
 
 
 
-class InvProduct(Resource):
+class clsInvProduct(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
+    # get list of products, used in product grid
     def get(self, *args, **kwargs):
         try:
             debug_sproc = int(request.headers.get('debug_sproc'))
@@ -81,6 +83,7 @@ class InvProduct(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
+    # insert new product
     def post(self, *args, **kwargs):
         try:
             data = request.get_json()
@@ -111,6 +114,7 @@ class InvProduct(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
+    # update existing product
     def put(self, *args, **kwargs):
         try:
             data = request.get_json()
@@ -143,6 +147,7 @@ class InvProduct(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
+    # delete a specific product
     def delete(self, *args, **kwargs):
         try:
             entity_id = int(request.headers.get('entity_id'))

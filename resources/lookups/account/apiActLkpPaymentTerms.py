@@ -10,6 +10,7 @@ class clsActLkpPaymentTerms(Resource):
 
     @fn_make_client_db_connection()
     @fn_check_screen_permission()
+    # get list of payment terms, used to populate drop down
     def get(self, *args, **kwargs):
         try:
             debug_sproc = int(request.headers.get('debug_sproc'))
