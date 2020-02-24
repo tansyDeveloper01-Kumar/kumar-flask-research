@@ -54,8 +54,7 @@ class clsLogin(Resource):
                                                             token, *output_params)
                 
                 sproc_result_sets = fn_sproc_response(cursor)
-                print(sproc_result_args)
-                                
+
                 if sproc_result_args[-4] == "Success":
                     get_module_names = [result_set[0] for result_set in sproc_result_sets]
 

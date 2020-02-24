@@ -29,4 +29,4 @@ fn_lkp_act_initialize_routes(api)
 
 if __name__ == "__main__":
     load_dotenv()
-    app.run()
+    app.run(debug=True)
