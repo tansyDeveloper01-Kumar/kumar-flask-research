@@ -73,7 +73,7 @@ class clsLogin(Resource):
                         'database': client_db_details[1],
                         'host': client_db_details[4]
                     }
-                    return { 'Status': sproc_result_args[-4], 'data': result_json}, 200
+                    return { 'Status': sproc_result_args[-4], 'data': "ok"}, 200
                 else:
                     return { 'Status': 'Failure', 'data': sproc_result_args[-4], 'error': sproc_result_args[-1]}, 400
         except Exception as error:
