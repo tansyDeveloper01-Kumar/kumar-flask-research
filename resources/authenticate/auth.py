@@ -15,6 +15,7 @@ class clsLogin(Resource):
     
     def post(self):
         try:
+            print("------- Calling Post method ------")
             data = request.get_json()
             print("-------------")
             print("data", data)
@@ -102,7 +103,7 @@ class clsLogin(Resource):
                     return { 'Status': 'Failure', 'data': sproc_result_args[-4], 'error': sproc_result_args[-1]}, 400
         except Exception as error:
             print("-------------")
-            print(error)
+            print("error", error)
             print("-------------")
             return {"error_response": error}, 400
         
