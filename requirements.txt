@@ -24,4 +24,4 @@ Werkzeug==0.16.1
 wrapt==1.11.2
 uwsgi
 gunicorn
-flask-restful
+
