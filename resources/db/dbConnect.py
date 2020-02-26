@@ -7,20 +7,11 @@ import datetime
 # connect to master db and get client db connection details
 # static connection
 def fn_sama_get_client_DB_details(user_domain_name):
-<<<<<<< HEAD
     try:
-=======
-    try:        
->>>>>>> 7b2afb2a79d3e5b9adc8347a8d4cb22e0ee35881
-        connection = fn_connect_client_db(host="35.221.182.51",
-                                          database="sama_master",
-                                          user="masterdbuser",
-                                          password="xx9mastermysql6xx")
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> 7b2afb2a79d3e5b9adc8347a8d4cb22e0ee35881
+        connection = fn_connect_client_db(host=os.environ.get('MH'),
+                                          database=os.environ.get('MDN'),
+                                          user=os.environ.get('MDU'),
+                                          password=os.environ.get('MDP'))
         connection_type = isinstance(connection, str)
         if connection_type == True:
             return connection, 400
