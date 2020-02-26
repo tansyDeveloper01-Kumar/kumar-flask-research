@@ -6,7 +6,7 @@ from resources.db.dbConnect import (fn_sama_get_client_DB_details,
 
 from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_response
 from resources.utils.crypto.crypto import fn_decrypt, fn_hash
-
+import datetime
 
 class clsLogin(Resource):
 
@@ -15,10 +15,10 @@ class clsLogin(Resource):
     
     def post(self):
         try:
-            data = request.get_json()
+            print("------- Calling Post method ------")
+            print("Start time for post method", datetime.datetime.now())
             print("-------------")
-            print("data", data)
-            print("-------------")
+            data = request.get_json()            
             user_id = data.get('domain_name')
             password = data.get('password')
             hash_password = fn_hash(data.get('password'))
@@ -27,28 +27,16 @@ class clsLogin(Resource):
 
             sproc_sama_result_sets, sproc_sama_result_args = fn_sama_get_client_DB_details(user_domain_name=domain_name)
 
-            if sproc_sama_result_args == 400:
-                print("-------------")
-                print(sproc_sama_result_sets)
-                print("-------------")
+            if sproc_sama_result_args == 400:                
                 return {'status': 'Failure', 'data': sproc_sama_result_sets}, 400
             elif sproc_sama_result_args[-3] == 1:
-                print("-------------")
-                print(sproc_sama_result_args[-1])
-                print("-------------")
                 return {'status': 'Failure', 'data': sproc_sama_result_args[-1] }, 400
             else:
                 client_db_details = sproc_sama_result_sets[0]
 
-                if client_db_details[0] is None:
-                    print("-------------")
-                    print("Invalid login")
-                    print("-------------")
+                if client_db_details[0] is None:                    
                     return {'status': 'Failure', 'data': 'Invalid login' }, 400
-                if not client_db_details:
-                    print("-------------")
-                    print("Client database not found")
-                    print("-------------")
+                if not client_db_details:                    
                     return {'status': 'Failure', 'data': 'Client database not found'}, 400
 
                 token = client_db_details[0]
@@ -92,18 +80,12 @@ class clsLogin(Resource):
                         'host': client_db_details[4]
                     }
                     print("-------------")
-                    print(result_json)
+                    print("Return data for login", datetime.datetime.now())
                     print("-------------")
                     return { 'Status': sproc_result_args[-4], 'data': result_json}, 200
-                else:
-                    print("-------------")
-                    print(sproc_result_args[-1])
-                    print("-------------")
+                else:                    
                     return { 'Status': 'Failure', 'data': sproc_result_args[-4], 'error': sproc_result_args[-1]}, 400
-        except Exception as error:
-            print("-------------")
-            print(error)
-            print("-------------")
+        except Exception as error:            
             return {"error_response": error}, 400
         
 

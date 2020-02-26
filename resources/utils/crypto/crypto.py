@@ -14,8 +14,9 @@ def fn_encrypt(secret):
 
 def fn_decrypt(cipher):
     x = "DBFFD8B07B1DECB98577F7ED1D78AA2E994111C03EC="
-    f = Fernet(x)
 
+    f = Fernet(x)
+    
     cipher_byte = cipher.encode('utf-8')
 
     secret = f.decrypt(cipher_byte).decode()
