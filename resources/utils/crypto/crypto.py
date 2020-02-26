@@ -3,7 +3,7 @@ import hashlib
 from cryptography.fernet import Fernet
 
 def fn_encrypt(secret):
-  x = os.getenv("MX")
+  x = "DBFFD8B07B1DECB98577F7ED1D78AA2E994111C03EC="
   f = Fernet(x)
 
   secret_byte = secret.encode('utf-8')
@@ -13,7 +13,7 @@ def fn_encrypt(secret):
   return cipher
 
 def fn_decrypt(cipher):
-    x = os.getenv("MX")
+    x = "DBFFD8B07B1DECB98577F7ED1D78AA2E994111C03EC="
     f = Fernet(x)
 
     cipher_byte = cipher.encode('utf-8')

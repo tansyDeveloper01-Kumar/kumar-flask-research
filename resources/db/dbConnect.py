@@ -8,10 +8,10 @@ from resources.db.executeSProc import fn_call_stored_procedure, fn_sproc_respons
 # static connection
 def fn_sama_get_client_DB_details(user_domain_name):
     try:
-        connection = fn_connect_client_db(host=os.environ.get("MH"),
-                                          database=os.environ.get("MDN"),
-                                          user=os.environ.get("MDU"),
-                                          password=os.environ.get("MDP"))
+        connection = fn_connect_client_db(host="35.221.182.51",
+                                          database="sama_master",
+                                          user="masterdbuser",
+                                          password="xx9mastermysql6xx")
 
         connection_type = isinstance(connection, str)
         if connection_type == True:
