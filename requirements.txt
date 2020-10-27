@@ -2,7 +2,7 @@ aniso8601==8.0.0
 astroid==2.3.3
 cffi==1.14.0
 Click==7.0
-cryptography==2.8
+cryptography==3.2
 dnspython==1.16.0
 Flask==1.1.1
 flask_restful==0.3.7
